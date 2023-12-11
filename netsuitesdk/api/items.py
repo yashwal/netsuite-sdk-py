@@ -1,6 +1,7 @@
 from .base import ApiBase
 from netsuitesdk.internal.utils import PaginatedSearch
 import logging
+from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
 
@@ -22,3 +23,22 @@ class Items(ApiBase):
         )
 
         return self._paginated_search_generator(paginated_search=paginated_search)
+    def post(self, data) -> OrderedDict:
+        assert data['externalId'], 'missing external id'
+        file = self.ns_client.Items()
+
+        if 'name' in data:
+            file['name'] = data['name']
+
+        if 'externalId' in data:
+            file['externalId'] = data['externalId']
+
+        if 'content' in data:
+            file['content'] = data['content']
+
+        if 'mediaType' in data:
+            file['mediaType'] = data['mediaType']
+
+        logger.debug('able to create file = %s', file)
+        res = self.ns_client.upsert(file)
+        return self._serialize(res)
